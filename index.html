@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Reddit Post</title>
+    <!-- Google Font Link -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/png" href="https://logos-world.net/wp-content/uploads/2020/10/Reddit-Emblem.png">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            margin: 0;
+            margin-bottom: 20px; /* Add margin bottom to create space between title and form */
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            margin-bottom: 20px; /* Add margin bottom to create space between form and post container */
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #postContainer {
+            text-align: center;
+            max-width: 600px; /* Adjust max-width as needed */
+            margin: auto;
+        }
+
+        #postContainer img {
+            max-width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            margin-top: 20px;
+        }
+
+        #postTitle {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Reddit Post</h1>
+    <div id="postContainer"></div>
+    <form id="subredditForm">
+        <input type="text" id="subreddit" name="subreddit" placeholder="Enter subreddit" required>
+        <button type="submit">Get Random Post</button>
+    </form>
+    <script>
+        document.getElementById("subredditForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const subreddit = document.getElementById("subreddit").value;
+            fetch(`https://www.reddit.com/r/${subreddit}/random.json`)
+                .then(response => response.json())
+                .then(data => {
+                    const post = data[0].data.children[0].data;
+                    let postHtml = '';
+                    if (post.url.startsWith("https://i.imgur.com/") || post.url.startsWith("https://i.redd.it/") || post.url.startsWith("https://www.reddit.com/gallery/")) {
+                        if (post.url.startsWith("https://www.reddit.com/gallery/")) {
+                            // Handle Reddit gallery links
+                            postHtml += `<iframe src="${post.url}/embed" frameborder="0" scrolling="no" width="100%" height="400px"></iframe>`;
+                        } else {
+                            postHtml += `<img src="${post.url}" alt="${post.title}">`;
+                        }
+                        postHtml += `<div id="postTitle">${post.title}</div>`;
+                    } else {
+                        postHtml += `<p><a href="${post.url}" target="_blank">${post.url}</a></p>`;
+                    }
+                    document.getElementById("postContainer").innerHTML = postHtml;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("postContainer").innerHTML = "<p>Error fetching post. Please try again later.</p>";
+                });
+        });
+    </script>
+</body>
+</html>
